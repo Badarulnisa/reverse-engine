@@ -1,0 +1,29 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*.pyc
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Environment / secrets
+.env
+.env.*
+*.pem
+*.key
+
+# Captured traffic and generated reports -- these contain real
+# request/response data (tokens, cookies, PII) and should not be committed
+*.har
+*.xlsx
+!sample_report*.xlsx
+
+# IDE
+.vscode/
+.idea/
+
+# OS cruft
+.DS_Store
+Thumbs.db
