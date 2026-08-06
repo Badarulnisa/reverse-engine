@@ -37,7 +37,8 @@ def parse_entry(entry: Dict[str, Any]) -> Dict[str, Any]:
     parsed_url = urlparse(url)
 
     content = response.get("content", {})
-    body_json = _try_json(content.get("text"))
+    raw_text = content.get("text")
+    body_json = _try_json(raw_text)
 
     post_data = request.get("postData", {})
     req_body_json = _try_json(post_data.get("text"))
@@ -54,6 +55,7 @@ def parse_entry(entry: Dict[str, Any]) -> Dict[str, Any]:
         "query_params": {q["name"]: q["value"] for q in request.get("queryString", [])},
         "request_body": req_body_json,
         "response_body": body_json,
+        "response_text_raw": raw_text,
         "started_at": entry.get("startedDateTime"),
         "time_ms": entry.get("time"),
     }

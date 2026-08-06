@@ -85,12 +85,18 @@ def build_report(
     output_path: str,
     findings: List[Dict[str, Any]] = None,
     finding_summary: List[Dict[str, Any]] = None,
+    bot_defense_findings: List[Dict[str, Any]] = None,
+    automation_status: List[Dict[str, Any]] = None,
+    snippets: List[Dict[str, Any]] = None,
 ) -> str:
     """
     summaries: output of system_detector.summarize_systems()
     system_endpoint_data: {system_host: {endpoint_path: [flat_rows]}}
     findings: output of vuln_scanner.scan_records() -- optional
     finding_summary: output of vuln_scanner.summarize_findings() -- optional
+    bot_defense_findings: output of bot_defense_scanner.scan_records() -- optional
+    automation_status: output of bot_defense_scanner.automatable_endpoints() -- optional
+    snippets: output of curl_generator.generate_snippets() -- optional
     """
     wb = Workbook()
     used_sheet_names: set = set()
@@ -109,6 +115,18 @@ def build_report(
     if findings:
         sec_ws = wb.create_sheet(_unique("Security Findings", used_sheet_names, 31))
         _write_table(sec_ws, findings, _unique("SecurityFindings", used_table_names, 60))
+
+    if automation_status:
+        auto_ws = wb.create_sheet(_unique("Automation Status", used_sheet_names, 31))
+        _write_table(auto_ws, automation_status, _unique("AutomationStatus", used_table_names, 60))
+
+    if bot_defense_findings:
+        bot_ws = wb.create_sheet(_unique("Bot Defense Findings", used_sheet_names, 31))
+        _write_table(bot_ws, bot_defense_findings, _unique("BotDefenseFindings", used_table_names, 60))
+
+    if snippets:
+        snip_ws = wb.create_sheet(_unique("Request Snippets", used_sheet_names, 31))
+        _write_table(snip_ws, snippets, _unique("RequestSnippets", used_table_names, 60))
 
     for system, endpoints in system_endpoint_data.items():
         for endpoint, rows in endpoints.items():

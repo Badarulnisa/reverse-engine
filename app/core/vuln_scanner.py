@@ -69,7 +69,7 @@ def _check_security_headers(record: Dict[str, Any]) -> List[Dict[str, Any]]:
 def _check_secrets(record: Dict[str, Any]) -> List[Dict[str, Any]]:
     findings = []
     haystacks = {
-        "response_body": str(record.get("response_body") or ""),
+        "response_body": record.get("response_text_raw") or str(record.get("response_body") or ""),
         "request_body": str(record.get("request_body") or ""),
         "url": record.get("url") or "",
     }
@@ -130,7 +130,7 @@ def _check_transport(record: Dict[str, Any]) -> List[Dict[str, Any]]:
 def _check_verbose_errors(record: Dict[str, Any]) -> List[Dict[str, Any]]:
     findings = []
     status = record.get("status") or 0
-    body_text = str(record.get("response_body") or "")
+    body_text = record.get("response_text_raw") or str(record.get("response_body") or "")
     if status >= 400 and body_text:
         for label, pattern in ERROR_LEAK_PATTERNS:
             if pattern.search(body_text):

@@ -66,3 +66,33 @@ sample_report_with_vulns.xlsx shows this against a HAR with planted issues
 Severity labels are a coarse triage aid, not a CVSS score -- verify manually
 before treating any finding as confirmed, and note the false-negative risk:
 this only catches known patterns, it's not exhaustive.
+
+## Bot-defense detection + request snippets (new)
+
+app/core/bot_defense_scanner.py flags CAPTCHA challenges (reCAPTCHA, hCaptcha,
+Turnstile, FunCaptcha/Arkose), known bot-management vendors (Cloudflare,
+Akamai, PerimeterX, DataDome, FingerprintJS), and requests that depend on
+short-lived values (csrf/nonce/timestamp/signature params) that will break
+on naive replay. Like vuln_scanner, it's passive-only -- it reads what's
+already in the HAR, it doesn't solve or bypass anything.
+
+app/core/curl_generator.py turns each distinct endpoint into a ready-to-run
+cURL command and Python requests snippet. Sensitive headers (Authorization,
+Cookie, API keys) are redacted to placeholders by default -- fill them in
+yourself before running, don't paste live tokens into a report you might
+share or commit.
+
+Three more report sheets: "Automation Status" (per-endpoint: likely
+automatable / fragile / blocked), "Bot Defense Findings" (every signal,
+worst-first), and "Request Snippets" (curl + requests code per endpoint).
+
+sample_report_full.xlsx shows the complete report -- vuln scan, bot-defense
+scan, and snippets together -- against a HAR with a CAPTCHA challenge page,
+a Cloudflare bot-management cookie, and a CSRF-token-dependent request.
+
+Bug fix in this pass: har_parser.py now also keeps the *raw* response text
+(response_text_raw) alongside the parsed JSON. Non-JSON responses (HTML
+CAPTCHA pages, plaintext error pages) were silently invisible to the
+pattern-based scanners before this -- worth knowing if you already ran the
+tool against real captures, since HTML-based challenge pages and error
+pages may have been under-reported.
