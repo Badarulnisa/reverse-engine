@@ -27,3 +27,6 @@ env/
 # OS cruft
 .DS_Store
 Thumbs.db
+
+.env
+"Register of DMCC entities_files/"

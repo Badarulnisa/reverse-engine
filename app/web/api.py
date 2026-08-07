@@ -1,9 +1,25 @@
+"""
+Local web interface for reverse-engine. Drop a .HAR file in the browser
+to run it through the same pipeline as the CLI (main.py) and download
+the resulting Excel report.
+"""
+
 import os
 import shutil
+import uuid
+
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import HTMLResponse, FileResponse
-from app.core.har_parser import parse_har
-from app.core.report_builder import build_excel_report
+
+from app.collectors.extractor import extract_records
+from app.core.bot_defense_scanner import automatable_endpoints
+from app.core.bot_defense_scanner import scan_records as scan_bot_defense
+from app.core.curl_generator import generate_snippets
+from app.core.har_parser import parse_har_file
+from app.core.report_builder import build_report
+from app.core.system_detector import group_by_system, summarize_systems
+from app.core.vuln_scanner import scan_records as scan_vulns
+from app.core.vuln_scanner import summarize_findings
 
 app = FastAPI(title="reverse-engine Web Interface")
 
@@ -32,6 +48,39 @@ HTML_TEMPLATE = """
 """
 
 
+def run_pipeline(har_path: str, output_path: str) -> str:
+    """
+    Same 6-step flow as main.py's run(), factored out so both the CLI
+    and the web upload handler call one shared implementation instead
+    of two copies that can drift apart.
+    """
+    records = parse_har_file(har_path)
+
+    grouped = group_by_system(records)
+    system_endpoint_data = {host: extract_records(recs) for host, recs in grouped.items()}
+    summaries = summarize_systems(grouped)
+
+    findings = scan_vulns(records)
+    finding_summary = summarize_findings(findings)
+
+    bot_findings = scan_bot_defense(records)
+    automation = automatable_endpoints(records, bot_findings)
+
+    snippets = generate_snippets(records)
+
+    build_report(
+        summaries,
+        system_endpoint_data,
+        output_path,
+        findings=findings,
+        finding_summary=finding_summary,
+        bot_defense_findings=bot_findings,
+        automation_status=automation,
+        snippets=snippets,
+    )
+    return output_path
+
+
 @app.get("/", response_class=HTMLResponse)
 async def main_dashboard():
     return HTML_TEMPLATE
@@ -39,17 +88,22 @@ async def main_dashboard():
 
 @app.post("/upload")
 async def upload_har(file: UploadFile = File(...)):
-    temp_path = f"temp_{file.filename}"
-    with open(temp_path, "wb") as buffer:
+    # unique-ish temp names so concurrent uploads in the same session don't collide
+    job_id = uuid.uuid4().hex[:8]
+    temp_har_path = f"temp_{job_id}_{file.filename}"
+    output_report_path = f"report_{job_id}.xlsx"
+
+    with open(temp_har_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    parsed_calls = parse_har(temp_path)
-    output_report = "report_output.xlsx"
-    build_excel_report(parsed_calls, output_report)
+    try:
+        run_pipeline(temp_har_path, output_report_path)
+    finally:
+        if os.path.exists(temp_har_path):
+            os.remove(temp_har_path)
 
-    os.remove(temp_path)
     return FileResponse(
-        output_report,
-        filename="report_output.xlsx",
+        output_report_path,
+        filename="report.xlsx",
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
