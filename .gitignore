@@ -1,4 +1,4 @@
-# Byte-compiled / cache
+﻿# Byte-compiled / cache
 __pycache__/
 *.py[cod]
 *.pyc
@@ -11,11 +11,11 @@ env/
 # Environment / secrets
 .env
 .env.*
+!.env.*.example
 *.pem
 *.key
 
-# Captured traffic and generated reports -- these contain real
-# request/response data (tokens, cookies, PII) and should not be committed
+# Captured traffic and generated reports
 *.har
 *.xlsx
 !sample_report*.xlsx
@@ -28,5 +28,4 @@ env/
 .DS_Store
 Thumbs.db
 
-.env
-"Register of DMCC entities_files/"
+Register of DMCC entities_files/
