@@ -1,31 +1,34 @@
-﻿# Byte-compiled / cache
-__pycache__/
-*.py[cod]
-*.pyc
-
-# Virtual environments
-venv/
-.venv/
-env/
-
-# Environment / secrets
-.env
-.env.*
-!.env.*.example
-*.pem
-*.key
-
-# Captured traffic and generated reports
+﻿# Session/auth artifacts -- contain real cookies, tokens, and signed session context
+storage_state.json
 *.har
-*.xlsx
-!sample_report*.xlsx
 
-# IDE
-.vscode/
-.idea/
+# Run state -- regenerable, and can leak scraped data structure/content
+checkpoint.json
+dmcc_checkpoint.json
+*_checkpoint.json
+
+# Debug scratch output
+debug_*.png
+debug_*.txt
+dmcc_page.png
+dmcc_page_text.txt
+
+# Generated output
+output/
+output_schemas/
+
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Environment files with credentials
+.env
+.env.local
+.env.proxy
 
 # OS cruft
 .DS_Store
 Thumbs.db
-
-Register of DMCC entities_files/
