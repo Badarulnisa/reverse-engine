@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DFSA Scraper Control Center</title>
+<style>
+  :root {
+    --bg: #0b0f14;
+    --panel: #121821;
+    --panel-border: #1f2937;
+    --text: #e5e7eb;
+    --dim: #8b95a5;
+    --accent: #3b82f6;
+    --green: #22c55e;
+    --yellow: #eab308;
+    --red: #ef4444;
+    --grey: #374151;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 14px;
+  }
+  header {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--panel-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  header h1 { font-size: 18px; margin: 0; font-weight: 600; }
+  header .status { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--dim); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--grey); }
+  .dot.connected { background: var(--green); }
+  button#runBtn, button#runFirmsBtn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  button#runBtn:hover, button#runFirmsBtn:hover { opacity: 0.9; }
+  button#runBtn:disabled, button#runFirmsBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 16px 24px; }
+  .full { grid-column: 1 / -1; }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .panel h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--dim); margin: 0 0 12px 0; }
+
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .stat-card { background: #0e141c; border: 1px solid var(--panel-border); border-radius: 6px; padding: 12px; }
+  .stat-card .value { font-size: 24px; font-weight: 700; }
+  .stat-card .label { font-size: 12px; color: var(--dim); margin-top: 2px; }
+  .stat-card.error .value { color: var(--red); }
+
+  .pipeline { display: flex; align-items: center; gap: 8px; }
+  .stage {
+    flex: 1;
+    text-align: center;
+    padding: 10px 4px;
+    border-radius: 6px;
+    background: #0e141c;
+    border: 1px solid var(--panel-border);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--dim);
+    transition: all 0.2s;
+  }
+  .stage.active { border-color: var(--accent); color: var(--accent); background: rgba(59,130,246,0.1); }
+  .stage.done { border-color: var(--green); color: var(--green); background: rgba(34,197,94,0.08); }
+  .stage.failed { border-color: var(--red); color: var(--red); background: rgba(239,68,68,0.08); }
+  .arrow { color: var(--grey); }
+
+  .feed { max-height: 480px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+  .event {
+    border: 1px solid var(--panel-border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    background: #0e141c;
+  }
+  .event.error { border-color: rgba(239,68,68,0.5); background: rgba(239,68,68,0.06); }
+  .event.warning { border-color: rgba(234,179,8,0.5); background: rgba(234,179,8,0.06); }
+  .event-summary { display: flex; align-items: baseline; gap: 8px; cursor: pointer; }
+  .event-type { font-weight: 600; font-size: 12px; }
+  .event-type.error { color: var(--red); }
+  .event-type.warning { color: var(--yellow); }
+  .event-type.success { color: var(--green); }
+  .event-company { color: var(--dim); font-size: 12px; }
+  .event-time { margin-left: auto; color: var(--dim); font-size: 11px; }
+  .event-explanation { font-size: 12px; color: var(--dim); margin-top: 4px; }
+  .event-raw {
+    display: none;
+    margin-top: 8px;
+    padding: 8px;
+    background: #05070a;
+    border-radius: 4px;
+    font-family: "SF Mono", Consolas, monospace;
+    font-size: 11px;
+    white-space: pre-wrap;
+    word-break: break-all;
+    color: #9ca3af;
+  }
+  .event-raw.open { display: block; }
+  .toggle-raw { font-size: 11px; color: var(--accent); cursor: pointer; margin-top: 4px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; color: var(--dim); font-weight: 600; padding: 6px 8px; border-bottom: 1px solid var(--panel-border); font-size: 11px; text-transform: uppercase; }
+  td { padding: 8px; border-bottom: 1px solid var(--panel-border); }
+  tr.company-row { cursor: pointer; }
+  tr.company-row:hover { background: rgba(255,255,255,0.03); }
+  .badge { padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+  .badge.complete { background: rgba(34,197,94,0.15); color: var(--green); }
+  .badge.failed { background: rgba(239,68,68,0.15); color: var(--red); }
+  .badge.processing { background: rgba(59,130,246,0.15); color: var(--accent); }
+
+  .empty-state { color: var(--dim); font-size: 13px; padding: 24px; text-align: center; }
+
+  .detail-view { display: none; }
+  .detail-view.open { display: block; }
+  .detail-view h3 { margin: 16px 0 8px 0; font-size: 13px; color: var(--dim); text-transform: uppercase; }
+  .kv-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px 16px; }
+  .kv-grid .k { color: var(--dim); font-size: 12px; }
+  .kv-grid .v { font-size: 13px; }
+  .close-detail { float: right; cursor: pointer; color: var(--accent); font-size: 12px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>DFSA Scraper Control Center</h1>
+  <div style="display:flex; align-items:center; gap:16px;">
+    <div class="status"><span class="dot" id="connDot"></span><span id="connLabel">connecting...</span></div>
+    <input id="maxFirms" type="number" placeholder="ALL" min="1" style="width:70px; background:#0e141c; border:1px solid var(--panel-border); color:var(--text); border-radius:6px; padding:6px;">
+    <button id="runFirmsBtn">Run Firms (blank = ALL)</button>
+    <button id="runBtn">Run Julius Baer Test</button>
+  </div>
+</header>
+
+<div class="layout">
+
+  <div class="panel full">
+    <h2>Pipeline</h2>
+    <div class="pipeline" id="pipeline"></div>
+  </div>
+
+  <div class="panel full">
+    <h2>Overview</h2>
+    <div class="stats" id="stats"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Live Activity Feed</h2>
+    <div class="feed" id="feed"><div class="empty-state">No events yet. Click "Run Julius Baer Test" to start.</div></div>
+  </div>
+
+  <div class="panel">
+    <h2>Errors</h2>
+    <div class="feed" id="errors"><div class="empty-state">No errors.</div></div>
+  </div>
+
+  <div class="panel full">
+    <h2>Companies</h2>
+    <table id="companyTable">
+      <thead><tr>
+        <th>Name</th><th>Reference</th><th>Legal Status</th><th>Individuals</th><th>Reg. Actions</th><th>Status</th>
+      </tr></thead>
+      <tbody id="companyRows"></tbody>
+    </table>
+    <div id="companyEmpty" class="empty-state">No companies processed yet.</div>
+  </div>
+
+  <div class="panel full detail-view" id="detailView">
+    <span class="close-detail" onclick="closeDetail()">close ✕</span>
+    <h2 id="detailName">—</h2>
+    <h3>Firm Details</h3>
+    <div class="kv-grid" id="detailFields"></div>
+    <h3>Financial Services</h3>
+    <div id="financialServicesBox"></div>
+    <h3>Individuals (<span id="individualsCount">0</span>)</h3>
+    <table><thead><tr><th>Name</th><th>Reference</th><th>Type</th><th>Effective</th><th>Withdrawn</th></tr></thead>
+      <tbody id="individualsRows"></tbody></table>
+    <h3>Regulatory Actions</h3>
+    <div id="regActionsBox"></div>
+    <h3>Raw Record</h3>
+    <div class="event-raw open" id="rawRecord"></div>
+  </div>
+
+</div>
+
+<script>
+const PIPELINE_STAGES = ["DISCOVERY", "FETCH", "PARSE", "VALIDATE", "COMPLETE"];
+let stageStatus = {}; // stage -> 'active' | 'done' | 'failed'
+let stats = { discovered: 0, fetched: 0, parsed: 0, completed: 0, failed: 0, requests: 0, retries: 0, saved: 0, saveFailed: 0, resumedFromCheckpoint: 0 };
+let companies = {}; // name -> record
+
+function renderPipeline() {
+  const el = document.getElementById("pipeline");
+  el.innerHTML = "";
+  PIPELINE_STAGES.forEach((stage, i) => {
+    const div = document.createElement("div");
+    div.className = "stage " + (stageStatus[stage] || "");
+    div.textContent = stage;
+    el.appendChild(div);
+    if (i < PIPELINE_STAGES.length - 1) {
+      const arrow = document.createElement("div");
+      arrow.className = "arrow";
+      arrow.textContent = "→";
+      el.appendChild(arrow);
+    }
+  });
+}
+
+function renderStats() {
+  const el = document.getElementById("stats");
+  const cards = [
+    ["Discovered", stats.discovered],
+    ["Detail Fetched", stats.fetched],
+    ["Parsed", stats.parsed],
+    ["Completed", stats.completed],
+    ["Resumed from Checkpoint", stats.resumedFromCheckpoint],
+    ["Failed", stats.failed, stats.failed > 0],
+    ["HTTP Requests", stats.requests],
+    ["Retries", stats.retries],
+    ["Saved to Disk", stats.saved],
+    ["Save Failures", stats.saveFailed, stats.saveFailed > 0],
+  ];
+  el.innerHTML = cards.map(([label, value, isError]) =>
+    `<div class="stat-card${isError ? ' error' : ''}"><div class="value">${value}</div><div class="label">${label}</div></div>`
+  ).join("");
+}
+
+function fmtTime(ts) {
+  return new Date(ts * 1000).toLocaleTimeString();
+}
+
+function classForEvent(e) {
+  if (e.type.includes("ERROR") || e.type === "FIRM_FAILED" || e.type === "REQUEST_FAILED") return "error";
+  if (e.type.includes("WARNING")) return "warning";
+  if (e.type.includes("SUCCESS") || e.type === "FIRM_COMPLETED") return "success";
+  return "";
+}
+
+function renderEvent(e) {
+  const cls = classForEvent(e);
+  const wrap = document.createElement("div");
+  wrap.className = "event " + (cls === "error" ? "error" : cls === "warning" ? "warning" : "");
+  const raw = JSON.stringify(e, null, 2);
+  wrap.innerHTML = `
+    <div class="event-summary" onclick="this.nextElementSibling.classList.toggle('open')">
+      <span class="event-type ${cls}">${e.type}</span>
+      <span class="event-company">${e.company || ''}</span>
+      <span class="event-time">${fmtTime(e.timestamp)}</span>
+    </div>
+    ${e.explanation ? `<div class="event-explanation">${e.explanation}${e.message ? ' — ' + e.message : ''}</div>` : (e.message ? `<div class="event-explanation">${e.message}</div>` : '')}
+    <div class="event-raw">${raw.replace(/</g,'&lt;')}</div>
+  `;
+  return wrap;
+}
+
+function pushFeed(e) {
+  const feed = document.getElementById("feed");
+  const emptyState = feed.querySelector(".empty-state");
+  if (emptyState) emptyState.remove();
+  feed.prepend(renderEvent(e));
+}
+
+function pushError(e) {
+  const errors = document.getElementById("errors");
+  const emptyState = errors.querySelector(".empty-state");
+  if (emptyState) emptyState.remove();
+  errors.prepend(renderEvent(e));
+}
+
+function updateCompanyTable() {
+  const rows = document.getElementById("companyRows");
+  const names = Object.keys(companies);
+  document.getElementById("companyEmpty").style.display = names.length ? "none" : "block";
+  rows.innerHTML = names.map(name => {
+    const c = companies[name];
+    const badgeClass = c.status === "COMPLETE" ? "complete" : c.status === "FAILED" ? "failed" : "processing";
+    return `<tr class="company-row" onclick="openDetail('${name.replace(/'/g, "\\'")}')">
+      <td>${name}</td>
+      <td>${c.reference || '—'}</td>
+      <td>${c.legalStatus || '—'}</td>
+      <td>${c.individualsCount ?? '—'}</td>
+      <td>${c.regActionsCount ?? '—'}</td>
+      <td><span class="badge ${badgeClass}">${c.status}</span></td>
+    </tr>`;
+  }).join("");
+}
+
+function openDetail(name) {
+  const c = companies[name];
+  if (!c) return;
+  document.getElementById("detailView").classList.add("open");
+  document.getElementById("detailName").textContent = name;
+  const fields = c.record ? c.record.firm_details : {};
+  document.getElementById("detailFields").innerHTML = Object.entries(fields || {}).map(
+    ([k, v]) => `<div class="k">${k}</div><div class="v">${v || '<span style="color:var(--dim)">empty</span>'}</div>`
+  ).join("");
+  const individuals = c.record ? c.record.individuals : [];
+  document.getElementById("individualsCount").textContent = individuals.length;
+  const financialServices = c.record ? c.record.financial_services : [];
+  document.getElementById("financialServicesBox").innerHTML = financialServices && financialServices.length
+    ? `<table><thead><tr><th>Category</th><th>Instruments</th></tr></thead><tbody>${
+        financialServices.map(f => `<tr><td>${f.category}</td><td>${(f.instruments||[]).join(", ")}</td></tr>`).join("")
+      }</tbody></table>`
+    : `<div class="empty-state">No financial service categories found</div>`;
+  document.getElementById("individualsRows").innerHTML = individuals.map(i =>
+    `<tr><td>${i.name}</td><td>${i.reference_number}</td><td>${i.type_of_individual}</td><td>${i.effective_date}</td><td>${i.date_withdrawn || '—'}</td></tr>`
+  ).join("");
+  const regActions = c.record ? c.record.regulatory_actions : [];
+  document.getElementById("regActionsBox").innerHTML = regActions.length
+    ? `<table><thead><tr><th>Title</th><th>Category</th><th>Date</th></tr></thead><tbody>${
+        regActions.map(r => `<tr><td>${r.title}</td><td>${r.category}</td><td>${r.date_of_use}</td></tr>`).join("")
+      }</tbody></table>`
+    : `<div class="empty-state">No regulatory actions found</div>`;
+  document.getElementById("rawRecord").textContent = JSON.stringify(c.record, null, 2);
+}
+function closeDetail() { document.getElementById("detailView").classList.remove("open"); }
+
+function handleEvent(e) {
+  pushFeed(e);
+  if (classForEvent(e) === "error") pushError(e);
+
+  if (e.stage) {
+    // Mark all prior stages done, current stage active (or failed).
+    const idx = PIPELINE_STAGES.indexOf(e.stage);
+    if (idx >= 0) {
+      for (let i = 0; i < idx; i++) stageStatus[PIPELINE_STAGES[i]] = "done";
+      stageStatus[e.stage] = (e.type.includes("FAILED") || e.type.includes("ERROR")) ? "failed" : "active";
+      if (e.type === "FIRM_COMPLETED" || e.type === "FIRM_SKIPPED_FROM_CHECKPOINT") {
+        PIPELINE_STAGES.forEach(s => stageStatus[s] = "done");
+      }
+    }
+  }
+
+  switch (e.type) {
+    case "FIRM_DISCOVERED":
+      stats.discovered++;
+      companies[e.company] = companies[e.company] || { status: "PROCESSING" };
+      break;
+    case "REQUEST_STARTED":
+      stats.requests++;
+      break;
+    case "REQUEST_RETRY":
+      stats.retries++;
+      break;
+    case "DETAIL_FETCH_SUCCESS":
+      stats.fetched++;
+      break;
+    case "FIRM_FIELDS_PARSED":
+      stats.parsed++;
+      if (companies[e.company]) {
+        companies[e.company].status = "PROCESSING";
+      }
+      break;
+    case "INDIVIDUALS_PARSED":
+      if (companies[e.company]) companies[e.company].individualsCount = e.counts?.rows_found;
+      break;
+    case "REGULATORY_ACTIONS_PARSED":
+      if (companies[e.company]) companies[e.company].regActionsCount = e.counts?.rows_found;
+      break;
+    case "FIRM_COMPLETED": {
+      stats.completed++;
+      const record = e.extra ? e.extra.record : null;
+      companies[e.company] = {
+        ...(companies[e.company] || {}),
+        status: "COMPLETE",
+        record,
+        reference: record?.firm_details?.["DFSA Reference Number"],
+        legalStatus: record?.firm_details?.["Legal Status"],
+        individualsCount: record?.individuals?.length,
+        regActionsCount: record?.regulatory_actions?.length,
+      };
+      break;
+    }
+    case "FIRM_SKIPPED_FROM_CHECKPOINT": {
+      stats.resumedFromCheckpoint++;
+      const record = e.extra ? e.extra.record : null;
+      if (record) {
+        stats.completed++;
+        companies[e.company] = {
+          ...(companies[e.company] || {}),
+          status: "COMPLETE",
+          record,
+          reference: record?.firm_details?.["DFSA Reference Number"],
+          legalStatus: record?.firm_details?.["Legal Status"],
+          individualsCount: record?.individuals?.length,
+          regActionsCount: record?.regulatory_actions?.length,
+          fromCheckpoint: true,
+        };
+      } else {
+        // checkpoint says done, but no matching record was found on disk --
+        // this is the dangerous case, not a normal skip. Surface it as
+        // FAILED so it doesn't silently look the same as a real success.
+        stats.failed++;
+        companies[e.company] = {
+          ...(companies[e.company] || {}),
+          status: "FAILED",
+          fromCheckpoint: true,
+        };
+      }
+      break;
+    }
+    case "FIRM_FAILED":
+      stats.failed++;
+      if (companies[e.company]) companies[e.company].status = "FAILED";
+      break;
+    case "RECORD_SAVED":
+      stats.saved++;
+      break;
+    case "RECORD_SAVE_FAILED":
+      stats.saveFailed++;
+      break;
+  }
+
+  renderPipeline();
+  renderStats();
+  updateCompanyTable();
+}
+
+// --- WebSocket wiring ---
+const proto = location.protocol === "https:" ? "wss:" : "ws:";
+const ws = new WebSocket(`${proto}//${location.host}/ws`);
+ws.onopen = () => { document.getElementById("connDot").classList.add("connected"); document.getElementById("connLabel").textContent = "connected"; };
+ws.onclose = () => { document.getElementById("connDot").classList.remove("connected"); document.getElementById("connLabel").textContent = "disconnected"; };
+ws.onmessage = (msg) => handleEvent(JSON.parse(msg.data));
+
+document.getElementById("runBtn").onclick = async () => {
+  document.getElementById("runBtn").disabled = true;
+  stageStatus = {};
+  await fetch("/run/julius-baer", { method: "POST" });
+  setTimeout(() => { document.getElementById("runBtn").disabled = false; }, 3000);
+};
+
+document.getElementById("runFirmsBtn").onclick = async () => {
+  const raw = document.getElementById("maxFirms").value;
+  const n = raw ? parseInt(raw, 10) : null;
+  document.getElementById("runFirmsBtn").disabled = true;
+  stageStatus = {};
+  const url = n ? `/run/firms?max_firms=${n}` : `/run/firms`;
+  await fetch(url, { method: "POST" });
+  setTimeout(() => { document.getElementById("runFirmsBtn").disabled = false; }, 3000);
+};
+
+renderPipeline();
+renderStats();
+</script>
+
+</body>
+</html>
