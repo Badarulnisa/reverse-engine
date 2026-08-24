@@ -1,0 +1,278 @@
+{
+  "advancedSearch": [
+    {
+      "fieldSetName": "SearchFieldsAdvGen",
+      "headers": [
+        {
+          "dataType": "BOOLEAN",
+          "fieldAPIName": "Is_continued__c",
+          "isRequired": false,
+          "label": "Is continued?",
+          "options": [],
+          "value": "",
+          "allowRender": true
+        },
+        {
+          "dataType": "PICKLIST",
+          "fieldAPIName": "Entity_Status__c",
+          "isRequired": false,
+          "label": "Entity Status",
+          "options": [],
+          "value": "",
+          "allowRender": true
+        },
+        {
+          "dataType": "DATE",
+          "fieldAPIName": "Incorporation_Date__c",
+          "isRequired": false,
+          "label": "Incorporation Date",
+          "options": [],
+          "value": "",
+          "allowRender": false
+        },
+        {
+          "dataType": "PICKLIST",
+          "fieldAPIName": "Category__c",
+          "isRequired": false,
+          "label": "Category",
+          "options": [],
+          "value": "",
+          "allowRender": true
+        }
+      ],
+      "isParent": true,
+      "objectName": "Account"
+    }
+  ],
+  "advancedSearch_auditors": [
+    {
+      "fieldSetName": "SearchFieldsAuditor",
+      "headers": [],
+      "isParent": false,
+      "objectName": "Account",
+      "relationshipName": "Subject_Account__r"
+    }
+  ],
+  "advancedSearch_companies": [
+    {
+      "fieldSetName": "SearchFieldsAdvComp",
+      "headers": [],
+      "isParent": true,
+      "objectName": "Account"
+    }
+  ],
+  "advancedSearch_foliostrataplanstratalot": [
+    {
+      "fieldSetName": "SearchFieldsFolioStrataPlanLotAdvanced",
+      "headers": [],
+      "isParent": false,
+      "objectName": "Property__c"
+    }
+  ],
+  "advancedSearch_foundation": [
+    {
+      "fieldSetName": "SearchFieldsAdvFoun",
+      "headers": [],
+      "isParent": true,
+      "objectName": "Account"
+    }
+  ],
+  "advancedSearch_general": [
+    {
+      "fieldSetName": "SearchFieldsAdvGen",
+      "headers": [
+        {
+          "dataType": "BOOLEAN",
+          "fieldAPIName": "Is_continued__c",
+          "isRequired": false,
+          "label": "Is continued?",
+          "options": [],
+          "value": ""
+        },
+        {
+          "dataType": "PICKLIST",
+          "fieldAPIName": "Entity_Status__c",
+          "isRequired": false,
+          "label": "Entity Status",
+          "options": [],
+          "value": ""
+        },
+        {
+          "dataType": "DATE",
+          "fieldAPIName": "Incorporation_Date__c",
+          "isRequired": false,
+          "label": "Incorporation Date",
+          "options": [],
+          "value": ""
+        },
+        {
+          "dataType": "PICKLIST",
+          "fieldAPIName": "Category__c",
+          "isRequired": false,
+          "label": "Category",
+          "options": [],
+          "value": ""
+        }
+      ],
+      "isParent": true,
+      "objectName": "Account"
+    }
+  ],
+  "advancedSearch_InsolvencyPractitioner": [
+    {
+      "fieldSetName": "SearchFieldsInsolvencyPractitioner",
+      "headers": [],
+      "isParent": false,
+      "objectName": "Account",
+      "relationshipName": "Subject_Account__r"
+    }
+  ],
+  "advancedSearch_partnership": [
+    {
+      "fieldSetName": "SearchFieldsAdvPart",
+      "headers": [],
+      "isParent": true,
+      "objectName": "Account"
+    }
+  ],
+  "advancedsearch_RegisteredBuilding": [
+    {
+      "fieldSetName": "SearchFieldsLeaseAdvancedBuilding",
+      "headers": [],
+      "isParent": false,
+      "objectName": "Linked_Unit__c"
+    }
+  ],
+  "advancedsearch_RegisteredLand": [
+    {
+      "fieldSetName": "SearchFieldsLeaseAdvancedLand",
+      "headers": [],
+      "isParent": false,
+      "objectName": "Linked_Unit__c"
+    }
+  ],
+  "advancedsearch_RegisteredLease": [
+    {
+      "fieldSetName": "SearchFieldsLeaseAdvanced",
+      "headers": [],
+      "isParent": false,
+      "objectName": "Linked_Unit__c"
+    }
+  ],
+  "advancedsearch_RegisteredUnit": [
+    {
+      "fieldSetName": "SearchFieldsLeaseAdvancedUnit",
+      "headers": [],
+      "isParent": false,
+      "objectName": "Linked_Unit__c"
+    }
+  ],
+  "advancedSearch_reservedname": [
+    {
+      "fieldSetName": "ReservedName",
+      "headers": [],
+      "isParent": true,
+      "objectName": "Trade_Name__c"
+    }
+  ],
+  "advancedSearch_role": [
+    {
+      "fieldSetName": "RoleSearchFields",
+      "headers": [],
+      "isParent": true,
+      "objectName": "Role__c"
+    },
+    {
+      "fieldSetName": "RoleFieldSet",
+      "headers": [],
+      "isParent": false,
+      "objectName": "Account",
+      "relationshipName": "Subject_Account__r"
+    }
+  ],
+  "advancedSearch_temporarypermit": [
+    {
+      "fieldSetName": "TempPermitSearchFields",
+      "headers": [],
+      "isParent": true,
+      "objectName": "Account"
+    }
+  ],
+  "buttonConfig": {
+    "buttonPlacement": "RIGHT",
+    "buttons": [
+      {
+        "actionType": "Create_BookMark",
+        "label": "Add to Watchlist",
+        "renderCheckField": "Show_Request_Option__c",
+        "renderCheckValue": "Add BookMark",
+        "styleClass": "requestBtn"
+      },
+      {
+        "actionType": "Remove_BookMark",
+        "label": "Remove from Watchlist",
+        "renderCheckField": "Show_Request_Option__c",
+        "renderCheckValue": "Remove BookMark",
+        "styleClass": "cancelBtn"
+      }
+    ],
+    "canSelectMultiple": false,
+    "rowLevel": true
+  },
+  "defaultOrderBy": "ASC",
+  "generalSearch": [
+    {
+      "fieldSetName": "SearchFields",
+      "headers": [
+        {
+          "dataType": "STRING",
+          "fieldAPIName": "Name",
+          "isRequired": false,
+          "label": "Account Name",
+          "options": [],
+          "value": "A"
+        }
+      ],
+      "isParent": true,
+      "objectName": "Account"
+    }
+  ],
+  "generalSearch_Folio": [
+    {
+      "fieldSetName": "SearchFieldsFolioGeneral",
+      "headers": [],
+      "isParent": true,
+      "objectName": "Property__c"
+    }
+  ],
+  "generalsearch_RegisteredLease": [
+    {
+      "fieldSetName": "SearchFieldsLeaseGeneral",
+      "headers": [],
+      "isParent": true,
+      "objectName": "Linked_Unit__c"
+    }
+  ],
+  "generalSearch_StrataLot": [
+    {
+      "fieldSetName": "SearchFieldsStrataLotGeneral",
+      "headers": [],
+      "isParent": true,
+      "objectName": "Property__c"
+    }
+  ],
+  "generalSearch_StrataPlan": [
+    {
+      "fieldSetName": "SearchFieldsStrataPlanGeneral",
+      "headers": [],
+      "isParent": true,
+      "objectName": "Property__c"
+    }
+  ],
+  "orderByFields": "Name",
+  "resultFieldSet": "RequestAccessSearchResult",
+  "showAdvancedSearch": false,
+  "showRegisteredEntities": true,
+  "pageNumber": 1,
+  "pageSize": "10"
+}

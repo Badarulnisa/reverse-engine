@@ -1,34 +1,31 @@
 ﻿# Session/auth artifacts -- contain real cookies, tokens, and signed session context
 storage_state.json
 *.har
-
 # Run state -- regenerable, and can leak scraped data structure/content
 checkpoint.json
 dmcc_checkpoint.json
 *_checkpoint.json
-
 # Debug scratch output
 debug_*.png
 debug_*.txt
 dmcc_page.png
 dmcc_page_text.txt
-
 # Generated output
 output/
 output_schemas/
-
+*.jsonl
+*.csv
+*.xlsx
 # Python
 venv/
 __pycache__/
 *.pyc
 *.pyo
 .pytest_cache/
-
 # Environment files with credentials
 .env
 .env.local
 .env.proxy
-
 # OS cruft
 .DS_Store
 Thumbs.db
