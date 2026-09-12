@@ -82,6 +82,12 @@ Each registry went through its own real debugging arc. Documented separately bel
   <img src="docs/screenshots/03-tor-rotation-test.png" alt="Tor circuit rotation test output" width="650"/>
 </p>
 
+<p align="center">
+  <img src="docs/screenshots/11-tor-bootstrap-investindubai.png" alt="Tor bootstrapping to 100% for circuit rotation" width="750"/>
+  <br/>
+  <sub>Tor client bootstrapping a fresh circuit for IP rotation during the Invest Dubai enumeration run.</sub>
+</p>
+
 **4. Pivoted to HAR replay** — captured one legitimate, manually-solved session and replayed its authenticated Visualforce Remoting call directly with `requests`, bypassing the DOM and the captcha entirely for every subsequent query.
 
 <p align="center">
@@ -161,6 +167,12 @@ The Invest Dubai search endpoint includes a `token` field in its request body �
 **1. Attempted direct replay** — same approach as DMCC's captcha bypass — but the token is single-use and tied to a specific challenge state; it can't be forged or pre-generated outside the browser.
 
 **2. Fell back to browser-driven interception** — let a real page perform the search (its own JS mints a valid token naturally), and intercept the resulting network call rather than trying to construct the request from scratch.
+
+<p align="center">
+  <img src="docs/screenshots/10-visitdubai-brute-enumeration.png" alt="VisitDubai DUL enumeration run tracking success/fail/dupe counts" width="750"/>
+  <br/>
+  <sub>Invest Dubai brute-force DUL enumeration in progress — confirmed permanent-not-found codes tracked alongside live success/fail counters.</sub>
+</p>
 
 **3. Layered in geographic matching for JAFZA enrichment** — a separate `matcher.py` normalizes company names and scores them by core-token overlap (filtering common noise tokens) to reconcile JAFZA listings against Google Places results, pulled via the Places API using a key read from `GOOGLE_MAPS_API_KEY` — never hardcoded.
 
