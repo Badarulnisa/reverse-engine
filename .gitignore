@@ -30,3 +30,7 @@ __pycache__/
 .DS_Store
 Thumbs.db
 dfsa_scraper/firms.zip
+
+# Scraped state/data (investindubai)
+investindubai/*.json
+investindubai/*_MISSING_DULS.txt
