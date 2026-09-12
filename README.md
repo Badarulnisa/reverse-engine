@@ -82,6 +82,7 @@ Each registry went through its own real debugging arc. Documented separately bel
   <img src="docs/screenshots/03-tor-rotation-test.png" alt="Tor circuit rotation test output" width="650"/>
 </p>
 
+
 <p align="center">
   <img src="docs/screenshots/11-tor-bootstrap-investindubai.png" alt="Tor bootstrapping to 100% for circuit rotation" width="750"/>
   <br/>
