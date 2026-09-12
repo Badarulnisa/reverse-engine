@@ -34,3 +34,7 @@ dfsa_scraper/firms.zip
 # Scraped state/data (investindubai)
 investindubai/*.json
 investindubai/*_MISSING_DULS.txt
+
+# Source archives (already extracted)
+growth-gov-mock-lab.tar.gz
+tenant-isolation-lab.gz
