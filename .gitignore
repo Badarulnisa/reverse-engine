@@ -38,3 +38,21 @@ investindubai/*_MISSING_DULS.txt
 # Source archives (already extracted)
 growth-gov-mock-lab.tar.gz
 tenant-isolation-lab.gz
+
+# Browser profiles and download artifacts
+investindubai/chrome_os_profile/
+investindubai/chrome_profile/
+*.crdownload
+investindubai/*_debug.png
+investindubai/*_discovery_empty.txt
+investindubai/*_discovery_skipped.txt
+
+# Scrapling/browser profiles
+qatrcid/scrapling_profile/
+qatrcid/blank_sample.html
+
+# Scraper outputs (data, not source)
+qatrcid/qatarcid_checkpoint.json
+qatrcid/qatarcid_companies.xlsx
+sharjah-scrapper/sharjah_checkpoint.json
+sharjah-scrapper/sharjah_companies.xlsx
